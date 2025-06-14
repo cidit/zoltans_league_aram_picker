@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARAM Lobby</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .sheen-button {
+      position: relative;
+      overflow: hidden;
+    }
+    .sheen-button::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -75%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(120deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0.3) 100%);
+      transform: skewX(-20deg);
+      transition: left 0.75s ease-in-out;
+    }
+    .sheen-button:hover::before {
+      left: 125%;
+    }
+    .glass-button {
+      background: rgba(255, 165, 0, 0.25);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 165, 0, 0.4);
+      color: #000;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      border-radius: 9999px;
+      padding: 0.75rem 1.5rem;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+    }
+    .glass-button:hover {
+      background: rgba(255, 165, 0, 0.35);
+      transform: scale(1.05);
+    }
+    .slide-blue {
+      animation: slideInLeft 0.4s ease;
+    }
+    .slide-red {
+      animation: slideInRight 0.4s ease;
+    }
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+  </style>
+  <script>
+    let currentPlayer = null;
+    let playerCount = 0;
+    const players = [];
+    let lastTeamMap = new Map();
+
+    function createPlayer(name) {
+      const team = playerCount % 2 === 0 ? 'blue' : 'red';
+      const isLeader = playerCount === 0;
+      players.push({ name, team, isLeader });
+      currentPlayer = name;
+      playerCount++;
+      updateLobby();
+    }
+
+    function switchTeams(name) {
+      const player = players.find(p => p.name === name);
+      if (!player) return;
+      player.team = player.team === 'blue' ? 'red' : 'blue';
+      updateLobby(true);
+    }
+
+    function countTeam(team) {
+      return players.filter(p => p.team === team).length;
+    }
+
+    function updateLobby(animate = false) {
+      const blueTeam = document.getElementById('blue-team');
+      const redTeam = document.getElementById('red-team');
+      const startBtn = document.getElementById('start-btn');
+
+      blueTeam.innerHTML = '';
+      redTeam.innerHTML = '';
+
+      const bluePlayers = players.filter(p => p.team === 'blue');
+      const redPlayers = players.filter(p => p.team === 'red');
+
+      const currentTeamMap = new Map();
+      players.forEach(p => currentTeamMap.set(p.name, p.team));
+
+      for (let i = 0; i < 5; i++) {
+        const bPlayer = bluePlayers[i];
+        const rPlayer = redPlayers[i];
+
+        const blueSlot = document.createElement('div');
+        blueSlot.className = 'p-2 bg-white rounded shadow h-10 flex items-center justify-center hover:shadow-md transition';
+        if (bPlayer && animate && lastTeamMap.get(bPlayer.name) !== 'blue') blueSlot.classList.add('slide-blue');
+        blueSlot.innerHTML = bPlayer ? `${bPlayer.name} ${bPlayer.isLeader ? '👑' : ''}` : '-';
+        blueTeam.appendChild(blueSlot);
+
+        const redSlot = document.createElement('div');
+        redSlot.className = 'p-2 bg-white rounded shadow h-10 flex items-center justify-center hover:shadow-md transition';
+        if (rPlayer && animate && lastTeamMap.get(rPlayer.name) !== 'red') redSlot.classList.add('slide-red');
+        redSlot.innerHTML = rPlayer ? `${rPlayer.name} ${rPlayer.isLeader ? '👑' : ''}` : '-';
+        redTeam.appendChild(redSlot);
+      }
+
+      lastTeamMap = currentTeamMap;
+
+      const teamOverCap = countTeam('blue') > 5 || countTeam('red') > 5;
+      const isLeader = players.find(p => p.name === currentPlayer)?.isLeader;
+
+      startBtn.disabled = teamOverCap || !isLeader;
+      startBtn.className = `mt-6 w-full py-3 text-white font-bold rounded ${startBtn.disabled ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700 sheen-button'}`;
+    }
+
+    function handleNameSubmit() {
+      const nameInput = document.getElementById('name-input');
+      const name = nameInput.value.trim();
+      if (!name || players.find(p => p.name === name)) {
+        alert("Invalid or duplicate name. Try again.");
+        return;
+      }
+      document.getElementById('name-modal').classList.add('hidden');
+      createPlayer(name);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const modal = document.getElementById('name-modal');
+      modal.classList.remove('hidden');
+      document.getElementById('name-input').focus();
+    });
+  </script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
+  <!-- Name Input Modal -->
+  <div id="name-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white p-6 rounded shadow-lg w-full max-w-md">
+      <h2 class="text-xl font-bold mb-4">Enter Your Name</h2>
+      <input id="name-input" type="text" class="w-full p-2 border border-gray-300 rounded mb-4" placeholder="Your name...">
+      <button onclick="handleNameSubmit()" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">Join Lobby</button>
+    </div>
+  </div>
+
+  <!-- Lobby UI -->
+  <div class="text-center mb-4">
+    <img src="images/aram-title.png" alt="ARAM" class="mx-auto w-[500px] mb-2">
+  </div>
+
+  <div class="bg-white shadow-lg rounded p-6 w-full max-w-5xl">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex-1 flex justify-center">
+        <img src="images/blue-label.png" alt="BLUE" class="w-24">
+      </div>
+      <div class="flex-1 flex justify-center">
+        <img src="images/red-label.png" alt="RED" class="w-24">
+      </div>
+    </div>
+
+    <div class="flex gap-4">
+      <div class="flex-1 bg-blue-100 p-4 rounded">
+        <div id="blue-team" class="space-y-2"></div>
+      </div>
+
+      <div class="flex flex-col justify-center items-center">
+        <button onclick="switchTeams(currentPlayer)" class="glass-button mb-4">
+          <img src="images/switch-icon.png" alt="Switch Teams" class="w-10 h-10">
+        </button>
+      </div>
+
+      <div class="flex-1 bg-red-100 p-4 rounded">
+        <div id="red-team" class="space-y-2"></div>
+      </div>
+    </div>
+
+    <button id="start-btn" disabled class="mt-6 w-full py-3 text-white font-bold rounded bg-gray-400 cursor-not-allowed">
+      Start Game
+    </button>
+  </div>
+</body>
+</html>
