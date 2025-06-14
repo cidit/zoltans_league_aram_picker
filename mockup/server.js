@@ -30,28 +30,33 @@ app.get('/', (_req, res) => {
 });
 
 io.on('connection', (socket) => {
-  let user = {
-    id, username: `New User ${id}`, 
-  }
-  if (socket.handshake.auth.id in Object.keys(users)) {
-    // re-connection
-  } else if (socket.handshake.auth.id) {
-    users[id] = user
-  } else {
-    const id = v4();
-    socket.emit("you-are", id);
-    users[id] = user
+  let id = socket.handshake.auth.id || v4();
+  socket.emit("you-are", id);
+
+  if (!users[id]) {
+    users[id] = { id, username: `New User ${id}` };
   }
 
   console.log(`id ${id} connected`);
   io.emit("user-joined", users[id]);
 
   socket.on("disconnect", () => {
-    console.log(`id ${id} disconnected`)
-    delete users[id]
-    socket.broadcast.emit("left", id)
-  })
+    console.log(`id ${id} disconnected`);
+    delete users[id];
+    socket.broadcast.emit("left", id);
+  });
+
+  socket.on("rename", (userId, username) => {
+    if (!users[userId]) return;
+    users[userId].username = username;
+    io.emit("user-update", users[userId]);
+  });
+
+  socket.on("request-player-list", () => {
+    io.emit("player-list", users);
+  });
 });
+
 
 
 io.on("request-player-list", () => {
