@@ -5,15 +5,24 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch:front": "watchify index.js -o static/bundle.min.js",
+    "watch:back": "nodemon server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@types/express": "^5.0.3",
+    "@types/jquery": "^3.5.32",
     "express": "^5.1.0",
+    "jquery": "^3.7.1",
     "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
     "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "uglify-js": "^3.19.3",
+    "watchify": "^4.0.0"
   }
 }

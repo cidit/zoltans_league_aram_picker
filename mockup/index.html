@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARAM Lobby</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script> -->
+  <!-- <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"
+    integrity="sha384-xniVEsCVCrm2Z+EpWEMQIzNBXkQ8Nk+pl7M+cghxfgZLf6V3AHTkMLyf8yCmRYIM"
+    crossorigin="anonymous"></script> -->
+  <style>
+    @keyframes slideInLeft {
+      from {
+        transform: translateX(-100%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .animate-slideInLeft {
+      animation: slideInLeft 0.3s ease-out;
+    }
+
+    .animate-slideInRight {
+      animation: slideInRight 0.3s ease-out;
+    }
+  </style>
+
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
+  <!-- Name Input Modal -->
+  <div id="name-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white p-6 rounded shadow-lg w-full max-w-md">
+      <h2 class="text-xl font-bold mb-4">Enter Your Name</h2>
+      <input id="name-input" type="text" class="w-full p-2 border border-gray-300 rounded mb-4"
+        placeholder="Your name...">
+      <button onclick="handleNameSubmit()" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">Join
+        Lobby</button>
+    </div>
+  </div>
+
+  <!-- Lobby UI -->
+  <div class="text-center mb-4">
+    <img src="images/aram-title.png" alt="ARAM" class="mx-auto w-40 mb-2">
+  </div>
+
+  <div class="bg-white shadow-lg rounded p-6 w-full max-w-5xl">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex-1 flex justify-center">
+        <img src="images/blue-label.png" alt="BLUE" class="w-24">
+      </div>
+      <div class="flex-1 flex justify-center">
+        <img src="images/red-label.png" alt="RED" class="w-24">
+      </div>
+    </div>
+
+    <div class="flex gap-4">
+      <div class="flex-1 bg-blue-100 p-4 rounded">
+        <div id="blue-team" class="space-y-2"></div>
+      </div>
+
+      <div class="flex flex-col justify-center items-center">
+        <button onclick="switchTeams(currentPlayer)"
+          class="bg-orange-200 bg-opacity-80 backdrop-blur border border-orange-300 text-black font-semibold rounded-full w-14 h-14 shadow hover:bg-orange-300 flex items-center justify-center">
+          <img src="images/switch-icon.png" alt="Switch Teams" class="w-6 h-6">
+        </button>
+      </div>
+
+      <div class="flex-1 bg-red-100 p-4 rounded">
+        <div id="red-team" class="space-y-2"></div>
+      </div>
+    </div>
+
+    <button id="start-btn" disabled
+      class="mt-6 w-full py-3 text-white font-bold rounded bg-gray-400 cursor-not-allowed">
+      Start Game
+    </button>
+  </div>
+  <script src="index.js" type="module" defer></script>
+</body>
+
+</html>
